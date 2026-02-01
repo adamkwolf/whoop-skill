@@ -1,7 +1,7 @@
 ---
 name: whoop
 description: Fetch WHOOP health data including recovery scores, sleep metrics, workouts, cycles, and profile. Use when user asks about WHOOP data, recovery, HRV, sleep analysis, or fitness metrics.
-metadata: {"openclaw":{"emoji":"💪","requires":{"env":["WHOOP_ACCESS_TOKEN"],"bins":["curl","jq"]},"primaryEnv":"WHOOP_ACCESS_TOKEN"}}
+metadata: {"openclaw":{"emoji":"💪","requires":{"env":["WHOOP_ACCESS_TOKEN","WHOOP_REFRESH_TOKEN"],"bins":["curl","jq"]},"primaryEnv":"WHOOP_ACCESS_TOKEN"}}
 homepage: https://developer.whoop.com
 ---
 
@@ -11,7 +11,7 @@ Access WHOOP health metrics: recovery scores, HRV, sleep analysis, workout strai
 
 ## Setup
 
-Set your WHOOP access token in `~/.openclaw/openclaw.json`:
+Add tokens to `~/.openclaw/openclaw.json`:
 
 ```json
 {
@@ -20,7 +20,10 @@ Set your WHOOP access token in `~/.openclaw/openclaw.json`:
       "whoop": {
         "enabled": true,
         "env": {
-          "WHOOP_ACCESS_TOKEN": "your-access-token"
+          "WHOOP_ACCESS_TOKEN": "your-access-token",
+          "WHOOP_REFRESH_TOKEN": "your-refresh-token",
+          "WHOOP_CLIENT_ID": "your-client-id",
+          "WHOOP_CLIENT_SECRET": "your-client-secret"
         }
       }
     }
@@ -28,7 +31,14 @@ Set your WHOOP access token in `~/.openclaw/openclaw.json`:
 }
 ```
 
-To get an access token, see `{baseDir}/references/setup-guide.md`.
+| Variable | Required For | Description |
+|----------|--------------|-------------|
+| `WHOOP_ACCESS_TOKEN` | All API calls | Expires hourly |
+| `WHOOP_REFRESH_TOKEN` | Auto-refresh | Long-lived, get from dashboard |
+| `WHOOP_CLIENT_ID` | Auto-refresh | From WHOOP developer app |
+| `WHOOP_CLIENT_SECRET` | Auto-refresh | From WHOOP developer app |
+
+Get tokens from the WHOOP dashboard. See `{baseDir}/references/setup-guide.md`.
 
 ## Commands
 
@@ -107,11 +117,7 @@ If output shows "WHOOP token refresh", cron is already set up - skip to Troubles
 
 ### Setup (one-time only):
 
-1. Ensure these env vars are in `~/.openclaw/openclaw.json`:
-   - `WHOOP_ACCESS_TOKEN`
-   - `WHOOP_REFRESH_TOKEN`
-   - `WHOOP_CLIENT_ID`
-   - `WHOOP_CLIENT_SECRET`
+1. Ensure all env vars from Setup section are configured.
 
 2. **Ask user for confirmation** before creating the cron job.
 

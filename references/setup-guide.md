@@ -4,50 +4,28 @@
 
 - WHOOP account with active subscription
 - `curl` and `jq` installed
+- WHOOP developer app (for client ID/secret)
 
-## Step 1: Get a WHOOP Access Token
+## Step 1: Get Your Tokens
 
-### Option A: WHOOP Developer Dashboard (Recommended)
+### Using the WHOOP Dashboard App
+
+1. Deploy or run the WHOOP dashboard app: https://github.com/adamkwolf/whoop-app
+2. Click "Connect WHOOP" and authorize
+3. On the dashboard, copy both:
+   - **Access Token** (expires hourly)
+   - **Refresh Token** (long-lived, for auto-refresh)
+
+### Getting Client ID & Secret
 
 1. Go to https://developer-dashboard.whoop.com
 2. Sign in with your WHOOP account
 3. Create or select an application
-4. Use the OAuth playground or token generator to get an access token
-5. Request these scopes:
-   - `read:recovery`
-   - `read:cycles`
-   - `read:workout`
-   - `read:sleep`
-   - `read:profile`
-   - `read:body_measurement`
-
-### Option B: OAuth Flow (Advanced)
-
-If you need to run the full OAuth flow:
-
-1. Register an app at https://developer-dashboard.whoop.com
-2. Set redirect URI to your callback endpoint
-3. Direct user to:
-   ```
-   https://api.prod.whoop.com/oauth/oauth2/auth?
-     client_id=YOUR_CLIENT_ID&
-     redirect_uri=YOUR_REDIRECT_URI&
-     response_type=code&
-     scope=read:recovery%20read:cycles%20read:workout%20read:sleep%20read:profile%20read:body_measurement
-   ```
-4. Exchange the returned code for tokens:
-   ```bash
-   curl -X POST https://api.prod.whoop.com/oauth/oauth2/token \
-     -d "grant_type=authorization_code" \
-     -d "code=AUTH_CODE" \
-     -d "client_id=YOUR_CLIENT_ID" \
-     -d "client_secret=YOUR_CLIENT_SECRET" \
-     -d "redirect_uri=YOUR_REDIRECT_URI"
-   ```
+4. Copy your **Client ID** and **Client Secret**
 
 ## Step 2: Configure OpenClaw
 
-Add your token to `~/.openclaw/openclaw.json`:
+Add all credentials to `~/.openclaw/openclaw.json`:
 
 ```json
 {
@@ -56,7 +34,10 @@ Add your token to `~/.openclaw/openclaw.json`:
       "whoop": {
         "enabled": true,
         "env": {
-          "WHOOP_ACCESS_TOKEN": "your-access-token-here"
+          "WHOOP_ACCESS_TOKEN": "your-access-token",
+          "WHOOP_REFRESH_TOKEN": "your-refresh-token",
+          "WHOOP_CLIENT_ID": "your-client-id",
+          "WHOOP_CLIENT_SECRET": "your-client-secret"
         }
       }
     }
@@ -64,26 +45,28 @@ Add your token to `~/.openclaw/openclaw.json`:
 }
 ```
 
-If the file doesn't exist, create it. If it exists, merge the whoop entry into the existing structure.
-
 ## Step 3: Test
 
 ```bash
-# Set token for testing
-export WHOOP_ACCESS_TOKEN="your-token"
-
-# Test the API
+# Test the API (OpenClaw will inject the env var)
 ~/.openclaw/skills/whoop/scripts/whoop-api.sh profile
 ```
 
 You should see your profile JSON.
 
-## Token Expiration
+## Step 4: Set Up Auto-Refresh (Optional)
 
-WHOOP access tokens expire after ~1 hour. When you get a 401 error:
+Access tokens expire hourly. Set up the cron job for automatic refresh:
 
-1. Get a new token from the developer dashboard
-2. Update `~/.openclaw/openclaw.json` with the new token
+```bash
+openclaw cron add --name "WHOOP token refresh" \
+  --cron "*/55 * * * *" \
+  --session isolated \
+  --message "Run ~/.openclaw/skills/whoop/scripts/whoop-refresh.sh and update WHOOP_ACCESS_TOKEN in ~/.openclaw/openclaw.json with the new access_token from the output." \
+  --model haiku
+```
+
+Verify: `openclaw cron list | grep -i whoop`
 
 ## Troubleshooting
 
