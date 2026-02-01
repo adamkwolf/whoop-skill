@@ -127,7 +127,7 @@ openclaw cron add --name "WHOOP token refresh" \
   --cron "*/55 * * * *" \
   --session isolated \
   --message "Run {baseDir}/scripts/whoop-refresh.sh and update BOTH WHOOP_ACCESS_TOKEN and WHOOP_REFRESH_TOKEN in ~/.openclaw/openclaw.json with the new tokens from the output. Both tokens rotate on each refresh." \
-  --model haiku
+  --model anthropic/claude-haiku-4-5
 ```
 
 4. Verify cron was created:
