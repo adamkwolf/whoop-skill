@@ -126,7 +126,7 @@ If output shows "WHOOP token refresh", cron is already set up - skip to Troubles
 openclaw cron add --name "WHOOP token refresh" \
   --cron "*/55 * * * *" \
   --session isolated \
-  --message "Run {baseDir}/scripts/whoop-refresh.sh and update WHOOP_ACCESS_TOKEN in ~/.openclaw/openclaw.json with the new access_token from the output." \
+  --message "Run {baseDir}/scripts/whoop-refresh.sh and update BOTH WHOOP_ACCESS_TOKEN and WHOOP_REFRESH_TOKEN in ~/.openclaw/openclaw.json with the new tokens from the output. Both tokens rotate on each refresh." \
   --model haiku
 ```
 

@@ -62,11 +62,13 @@ Access tokens expire hourly. Set up the cron job for automatic refresh:
 openclaw cron add --name "WHOOP token refresh" \
   --cron "*/55 * * * *" \
   --session isolated \
-  --message "Run ~/.openclaw/skills/whoop/scripts/whoop-refresh.sh and update WHOOP_ACCESS_TOKEN in ~/.openclaw/openclaw.json with the new access_token from the output." \
+  --message "Run ~/.openclaw/skills/whoop/scripts/whoop-refresh.sh and update BOTH WHOOP_ACCESS_TOKEN and WHOOP_REFRESH_TOKEN in ~/.openclaw/openclaw.json with the new tokens from the output. Both tokens rotate on each refresh." \
   --model haiku
 ```
 
 Verify: `openclaw cron list | grep -i whoop`
+
+**Note:** WHOOP rotates both tokens on each refresh. The cron job must update both to maintain the refresh cycle.
 
 ## Troubleshooting
 
